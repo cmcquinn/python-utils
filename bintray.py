@@ -1,6 +1,64 @@
 #!/usr/bin/env python3
 
-"""bintray.py: python script for uploading files to Bintray"""
+"""bintray.py: Upload files to Bintray"""
+
+__author__ = "Cameron McQuinn"
+__copyright__ = "Copyright 2019, Cameron McQuinn"
+__email__ = "cameron.mcquinn@gmail.com"
 
 import requests
+import argparse
+import subprocess
+import os
+import time
+import sys
 
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('user', help='Bintray user name')
+    parser.add_argument('repo', help='Bintray repo to upload to', type=str)
+    parser.add_argument('package', help='Name of package on Bintray', type=str)
+    parser.add_argument(
+        'file', help='Path to the file to be uploaded to Bintray', type=str)
+    args = parser.parse_args()
+
+    # build version string and append to url
+    commit = os.getenv('TRAVIS_COMMIT')
+    branch = os.getenv('TRAVIS_BRANCH')
+    timefmt = '%Y%m%d%H%m'
+    timestr = time.strftime(timefmt)
+    version = '{time}-{branch}-{commit}'.format(
+        time=timestr, branch=branch, commit=commit)
+
+    # get file basename
+    result = subprocess.run('basename {file}'.format(
+        file=args.file).split(), stdout=subprocess.PIPE, encoding='UTF-8', check=True)
+    basefile = result.stdout.strip()
+
+    # build url for upload
+    bintray = 'https://api.bintray.com/content/'
+    url = '{api}/{user}/{repo}/{package}/{version}/{file}'.format(
+        bintray, user=args.user, repo=args.repo, package=args.package, version=version, file=basefile)
+
+    # get API key from environment variable
+    key = os.getenv('BINTRAY_KEY')
+
+    # exit with an error code if the Bintray key does not exist
+    if key is None:
+        print('Error: Bintray API key not found in environment variable \'BINTRAY_KEY\'')
+        sys.exit(1)
+
+    # setup the file to be uploaded
+    file = {'file': open(args.file, 'rb')}
+
+    # upload to Bintray
+    print('Uploading file {} to Bintray via POST request...'.format(basefile))
+    r = requests.post(url, files=file)
+
+    # raise an exception if request resulted in a bad status code
+    r.raise_for_status()
+
+
+if __name__ == "__main__":
+    main()
