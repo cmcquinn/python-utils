@@ -37,24 +37,21 @@ def main():
     basefile = result.stdout.strip()
 
     # build url for upload
-    bintray = 'https://api.bintray.com/content/'
-    url = '{api}/{user}/{repo}/{package}/{version}/{file}'.format(
-        bintray, user=args.user, repo=args.repo, package=args.package, version=version, file=basefile)
+    bintray = 'https://api.bintray.com/content'
+    url = '{api}/{user}/{repo}/{package}/{version}/{file}?publish=1'.format(
+        api=bintray, user=args.user, repo=args.repo, package=args.package, version=version, file=basefile)
 
     # get API key from environment variable
     key = os.getenv('BINTRAY_KEY')
-
-    # exit with an error code if the Bintray key does not exist
-    if key is None:
-        print('Error: Bintray API key not found in environment variable \'BINTRAY_KEY\'')
-        sys.exit(1)
 
     # setup the file to be uploaded
     file = {'file': open(args.file, 'rb')}
 
     # upload to Bintray
     print('Uploading file {} to Bintray via POST request...'.format(basefile))
-    r = requests.post(url, files=file)
+    r = requests.put(url, files=file, auth=(args.user, key))
+
+    print('Response: {}'.format(r.text))
 
     # raise an exception if request resulted in a bad status code
     r.raise_for_status()
