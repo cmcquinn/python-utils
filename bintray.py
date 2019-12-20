@@ -31,15 +31,13 @@ def main():
     version = '{time}-{branch}-{commit}'.format(
         time=timestr, branch=branch, commit=commit)
 
-    # get file basename
-    result = subprocess.run('basename {file}'.format(
-        file=args.file).split(), stdout=subprocess.PIPE, encoding='UTF-8', check=True)
-    basefile = result.stdout.strip()
+    # build artifact name
+    name = '{}-{}'.format(args.package, version)
 
     # build url for upload
     bintray = 'https://api.bintray.com/content'
-    url = '{api}/{user}/{repo}/{package}/{version}/{file}?publish=1'.format(
-        api=bintray, user=args.user, repo=args.repo, package=args.package, version=version, file=basefile)
+    url = '{api}/{user}/{repo}/{package}/{version}/{name}?publish=1'.format(
+        api=bintray, user=args.user, repo=args.repo, package=args.package, version=version, name=name)
 
     # get API key from environment variable
     key = os.getenv('BINTRAY_KEY')
