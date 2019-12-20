@@ -46,7 +46,7 @@ def main():
     file = {'file': open(args.file, 'rb')}
 
     # upload to Bintray
-    print('Uploading file {} to Bintray via POST request...'.format(basefile))
+    print('Uploading file {} to Bintray via POST request...'.format(name))
     r = requests.put(url, files=file, auth=(args.user, key))
 
     print('Response: {}'.format(r.text))
