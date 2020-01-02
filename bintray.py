@@ -38,7 +38,7 @@ def main():
 
     # append file extension to name
     for ext in args.file.split('.')[1:]:
-        name.append('.' + ext)
+        name = name + '.' + ext
 
     # build url for upload
     bintray = 'https://api.bintray.com/content'
