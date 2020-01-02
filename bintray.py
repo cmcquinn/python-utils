@@ -36,6 +36,10 @@ def main():
     # build artifact name
     name = '{}-{}'.format(args.package, version)
 
+    # append file extension to name
+    for ext in args.file.split('.')[1:]:
+        name.append('.' + ext)
+
     # build url for upload
     bintray = 'https://api.bintray.com/content'
     url = '{api}/{user}/{repo}/{name}'.format(
