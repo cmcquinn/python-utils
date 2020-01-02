@@ -27,7 +27,7 @@ def main():
     result = subprocess.run('git rev-parse --short HEAD'.split(), stdout=subprocess.PIPE, encoding='UTF-8')
     commit = result.stdout.strip() # get short commit hash from output of git rev-parse
     result = subprocess.run('git rev-parse --abbrev-ref HEAD'.split(), stdout=subprocess.PIPE, encoding='UTF-8')
-    branch = result.stdout.strip() # get branch name from output of git rev-parse
+    branch = os.getenv('TRAVIS_BRANCH') if os.getenv('TRAVIS') else result.stdout.strip() # get branch name
     timefmt = '%Y%m%d%H%m'
     timestr = time.strftime(timefmt)
     version = '{time}-{branch}-{commit}'.format(
